@@ -1,0 +1,18 @@
+pragma ever-solidity >= 0.62.0;
+
+pragma AbiHeader expire;
+pragma AbiHeader time;
+pragma AbiHeader pubkey;
+
+interface ICollection {
+
+    event NftTypeNameChanged(uint256 nftId, address nftAddress, string oldTypeName, string newTypeName);
+    event NftNickNameChanged(uint256 nftId, address nftAddress, string oldNickName, string newNickName);
+	
+    function changeNftTypeName(uint256 nftId, address nftAddress, uint8 nftTypeIndex) external;
+	function changeNftNickName(uint256 nftId, address nftAddress, string nickName) external;
+
+    function acceptNftTypeNameChange(uint256 nftId, string oldNftTypeName, string newNftTypeName) external;		
+	function acceptNftNickNameChange(uint256 nftId, string oldNftNickName, string newNftNickName, address sendRemainGasTo) external;
+
+}

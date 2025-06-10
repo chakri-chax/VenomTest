@@ -1,0 +1,8 @@
+pragma ever-solidity >= 0.62.0;
+
+interface INft {
+   function getNftInfo() external view responsible returns(uint256, uint256, address, string, string);
+   function setTypeName(string typeName_) external;
+   function setNickName(string nickName_) external;
+}
+ 

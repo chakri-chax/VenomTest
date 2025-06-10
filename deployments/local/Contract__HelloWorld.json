@@ -1,0 +1,114 @@
+{
+    "type": "Contract",
+    "deploymentName": "HelloWorld",
+    "abi": {
+        "ABI version": 2,
+        "version": "2.2",
+        "header": [
+            "pubkey",
+            "time",
+            "expire"
+        ],
+        "functions": [
+            {
+                "name": "greet",
+                "inputs": [],
+                "outputs": [
+                    {
+                        "name": "_greet",
+                        "type": "string"
+                    }
+                ]
+            },
+            {
+                "name": "setGreet",
+                "inputs": [
+                    {
+                        "name": "_newGreet",
+                        "type": "string"
+                    }
+                ],
+                "outputs": []
+            },
+            {
+                "name": "constructor",
+                "inputs": [],
+                "outputs": []
+            },
+            {
+                "name": "greeting",
+                "inputs": [],
+                "outputs": [
+                    {
+                        "name": "greeting",
+                        "type": "string"
+                    }
+                ]
+            }
+        ],
+        "data": [],
+        "events": [],
+        "fields": [
+            {
+                "name": "_pubkey",
+                "type": "uint256"
+            },
+            {
+                "name": "_timestamp",
+                "type": "uint64"
+            },
+            {
+                "name": "_constructorFlag",
+                "type": "bool"
+            },
+            {
+                "name": "greeting",
+                "type": "string"
+            }
+        ]
+    },
+    "address": "0:a4f70b627cd2fd2d0a63a4edb032a4a4767ba7a17ee288ac1b87223591fa6b67",
+    "transaction": {
+        "transaction": {
+            "id": {
+                "lt": "21",
+                "hash": "03ba3da44fc23442a0f87247767518248b3605fe2e6179f7bafbcc24b2934f2f"
+            },
+            "prevTransactionId": {
+                "lt": "19",
+                "hash": "5979e03aed1ad55fea6a7ffe9edabc21ca9c702e9f193a88c73de6e7b2cc8995"
+            },
+            "createdAt": 1746028327,
+            "aborted": false,
+            "exitCode": 0,
+            "resultCode": 0,
+            "origStatus": "uninit",
+            "endStatus": "active",
+            "totalFees": "8392500",
+            "inMessage": {
+                "hash": "a3de88c4c9ce03cbf03290edb15e39c880e0432a6087b6ab8d60ae3dd799bc7f",
+                "dst": "0:a4f70b627cd2fd2d0a63a4edb032a4a4767ba7a17ee288ac1b87223591fa6b67",
+                "value": "0",
+                "bounce": false,
+                "bounced": false,
+                "body": "te6ccgEBAQEAcwAA4aD03vjIYw7z0Negse9XtDKCvva+Q8wFu+hZhsOH1Zb3pJnes+FbeRSpIOe5bdlAPb24m+pBfmOt4fuha/8cVQH3AxWPwMxwWMRberTleKb9mX4LNEPR38Rm9C3z4R42uAAAAGWh2XydmgSR2NotV8/g",
+                "bodyHash": "45372fd9c754895f42d83c1146af88fe224b46294dff8badde2d973e0b181535",
+                "boc": "te6ccgECFwEAAqwAA0eIAUnuFsT5pfpaFMdJ22BlSUjs909C/cURWDcORGsj9NbOEbAEAgEA4aD03vjIYw7z0Negse9XtDKCvva+Q8wFu+hZhsOH1Zb3pJnes+FbeRSpIOe5bdlAPb24m+pBfmOt4fuha/8cVQH3AxWPwMxwWMRberTleKb9mX4LNEPR38Rm9C3z4R42uAAAAGWh2XydmgSR2NotV8/gAQHAAwBD0DcDFY/AzHBYxFt6tOV4pv2Zfgs0Q9HfxGb0LfPhHja4IAQkiu1TIOMDIMD/4wIgwP7jAvILFAYFFgK27UTQ10nDAfhmIds80wABjhmDCNcYIPkBAdMAAZTT/wMBkwL4QuL5EPKoldMAAfJ64tM/AfhDIbnytCD4I4ED6KiCCBt3QKC58rT4Y9MfAfgjvPK50x8B2zzyPAwHA0rtRNDXScMB+GYi0NcLA6k4ANwhxwDjAiHXDR/yvCHjAwHbPPI8ExMHBFAgghBWbRhKuuMCIIIQaLVfP7rjAiCCEHWGkLm64wIgghB7Sz/8uuMCDwsJCAFOMNHbPPhKIY4bjQRwAAAAAAAAAAAAAAAAPtLP/yDIzszJcPsA3vIAEgNmMPhG8uBM+EJu4wDR2zwhjhsj0NMB+kAwMcjPhyDOghD1hpC5zwuBzMlw+wCRMOLjAPIAEgoQAAT4SgIiMPhCbuMA+Ebyc9H4ANs88gAMEAIW7UTQ10nCAY6A4w0NEgI0cO1E0PQFiPhqgED0DvK91wv/+GJw+GOI+GoWDgAWSGVsbG8gV29ybGQDKDD4RvLgTPhCbuMA1NHbPDDbPPIAEhEQACL4SvhD+ELIy//LP8+DzMntVAAI+AD4agAk7UTQ0//TP9MAMdTR+Gr4Y/hiAAr4RvLgTAIK9KQg9KEWFQAUc29sIDAuNjIuMAAA"
+            },
+            "outMessages": [],
+            "boc": "te6ccgECHQEAA98AA7V6T3C2J80v0tCmOk7bAypKR2e6ehfuKIrBuHIjWR+mtnAAAAAAAAABVZeeA67RrVX+pqf/6e2rwhypxwLp8ZOojHPebnssyJlQAAAAAAAAATaBJHJwAARwAeaIBQQBAg0MBhooAIRAAwIAW8AAAAAAAAAAAAAAAAEtRS2kSeULjPfdJ4YfFGEir+G1RruLcPyCFvDGFBOfjgQAnUI1QxOIAAAAAAAAAAAcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAgnJR54ijkq6VyWi5lwFW12lAN+MqCo0Um8xm0p54h+Kv5Lwz5Op0NRSo95nEyWG3jFCdLqA90QGRB8sdYb/ZavfMAQGgBgNHiAFJ7hbE+aX6WhTHSdtgZUlI7PdPQv3FEVg3DkRrI/TWzhGwCggHAOGg9N74yGMO89DXoLHvV7Qygr72vkPMBbvoWYbDh9WW96SZ3rPhW3kUqSDnuW3ZQD29uJvqQX5jreH7oWv/HFUB9wMVj8DMcFjEW3q05Xim/Zl+CzRD0d/EZvQt8+EeNrgAAABlodl8nZoEkdjaLVfP4AEBwAkAQ9A3AxWPwMxwWMRberTleKb9mX4LNEPR38Rm9C3z4R42uCAEJIrtUyDjAyDA/+MCIMD+4wLyCxoMCxwCtu1E0NdJwwH4ZiHbPNMAAY4ZgwjXGCD5AQHTAAGU0/8DAZMC+ELi+RDyqJXTAAHyeuLTPwH4QyG58rQg+COBA+iogggbd0CgufK0+GPTHwH4I7zyudMfAds88jwSDQNK7UTQ10nDAfhmItDXCwOpOADcIccA4wIh1w0f8rwh4wMB2zzyPBkZDQRQIIIQVm0YSrrjAiCCEGi1Xz+64wIgghB1hpC5uuMCIIIQe0s//LrjAhURDw4BTjDR2zz4SiGOG40EcAAAAAAAAAAAAAAAAD7Sz/8gyM7MyXD7AN7yABgDZjD4RvLgTPhCbuMA0ds8IY4bI9DTAfpAMDHIz4cgzoIQ9YaQuc8LgczJcPsAkTDi4wDyABgQFgAE+EoCIjD4Qm7jAPhG8nPR+ADbPPIAEhYCFu1E0NdJwgGOgOMNExgCNHDtRND0BYj4aoBA9A7yvdcL//hicPhjiPhqHBQAFkhlbGxvIFdvcmxkAygw+Eby4Ez4Qm7jANTR2zww2zzyABgXFgAi+Er4Q/hCyMv/yz/Pg8zJ7VQACPgA+GoAJO1E0NP/0z/TADHU0fhq+GP4YgAK+Eby4EwCCvSkIPShHBsAFHNvbCAwLjYyLjAAAA=="
+        },
+        "output": {}
+    },
+    "codeHash": "ee9ff9b8d8905f6e65f51b59ab504fe8b7c812a21e985a1c8c678e6c34294574",
+    "contractName": "HelloWorld",
+    "deployContractParams": {
+        "contract": "HelloWorld",
+        "publicKey": "dc0c563f0331c163116dead395e29bf665f82cd10f477f119bd0b7cf8478dae0",
+        "initParams": {
+            "_nonce": 56015
+        },
+        "constructorParams": {},
+        "value": "2000000000"
+    }
+}

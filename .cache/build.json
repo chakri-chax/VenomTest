@@ -1,0 +1,46 @@
+{
+    "contracts\\interfaces\\ICollection.tsol": {
+        "modificationTime": 1749532148000
+    },
+    "contracts\\libraries\\Errors.tsol": {
+        "modificationTime": 1749566700603
+    },
+    "contracts\\interfaces\\INft.tsol": {
+        "modificationTime": 1749532148000
+    },
+    "contracts\\Collection.tsol": {
+        "modificationTime": 1749568651507
+    },
+    "contracts\\Nft.tsol": {
+        "modificationTime": 1749566969317
+    },
+    "D:\\VenomAuditContracts\\venomAuditContracts\\node_modules\\@broxus\\tip4\\contracts\\TIP4_2_2\\TIP4_2_2Collection.tsol": {
+        "modificationTime": 1749565480917
+    },
+    "D:\\VenomAuditContracts\\venomAuditContracts\\node_modules\\@broxus\\tip4\\contracts\\TIP4_3\\TIP4_3Collection.tsol": {
+        "modificationTime": 1749565480939
+    },
+    "D:\\VenomAuditContracts\\venomAuditContracts\\node_modules\\@broxus\\tip4\\contracts\\access\\OwnableInternal.tsol": {
+        "modificationTime": 1749565480906
+    },
+    "D:\\VenomAuditContracts\\venomAuditContracts\\node_modules\\@broxus\\tip4\\contracts\\TIP4_1\\TIP4_1Nft.tsol": {
+        "modificationTime": 1749565480914
+    },
+    "D:\\VenomAuditContracts\\venomAuditContracts\\node_modules\\@broxus\\tip4\\contracts\\TIP4_2_2\\TIP4_2_2Nft.tsol": {
+        "modificationTime": 1749565480925
+    },
+    "D:\\VenomAuditContracts\\venomAuditContracts\\node_modules\\@broxus\\tip4\\contracts\\TIP4_3\\TIP4_3Nft.tsol": {
+        "modificationTime": 1749565480942
+    },
+    "compilerSettings": {
+        "externalContractsArtifacts": {
+            "node_modules/@broxus/tip4/precompiled": [
+                "Index",
+                "IndexBasis"
+            ]
+        },
+        "compilerPath": "C:\\Users\\SUPRAJA\\AppData\\Local\\locklift-nodejs\\Cache\\compiler\\0_62_0\\solc_0_62_0_win32.exe",
+        "linkerPath": "C:\\Users\\SUPRAJA\\AppData\\Local\\locklift-nodejs\\Cache\\linker\\0_15_48\\tvm_linker_0_15_48_win32.exe",
+        "linkerLibPath": "C:\\Users\\SUPRAJA\\AppData\\Local\\locklift-nodejs\\Cache\\lib\\0_62_0\\stdlib_sol_0_62_0.tvm"
+    }
+}

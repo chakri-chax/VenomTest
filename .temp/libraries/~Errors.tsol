@@ -1,0 +1,18 @@
+pragma ever-solidity >= 0.62.0;
+
+library Errors {
+
+	uint8 constant value_is_less_than_required = 104;
+	
+	uint8 constant not_callable = 199;
+	uint8 constant arrays_length_mismatch = 200;		
+	uint8 constant minting_must_be_active = 201;
+	uint8 constant nft_type_not_set = 202;
+	uint8 constant parent_nft_does_not_belong_to_this_collection = 203;
+	uint8 constant zero_address_is_prohibited_for_owner = 204;
+	uint8 constant nft_does_not_belong_to_this_collection = 205;
+	uint8 constant protected_nft_type = 206;
+
+}
+    
+    

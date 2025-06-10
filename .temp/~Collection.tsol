@@ -1,0 +1,225 @@
+pragma ever-solidity >= 0.62.0;
+
+pragma AbiHeader expire;
+pragma AbiHeader time;
+pragma AbiHeader pubkey;
+
+import "./~Nft.tsol";
+import "./interfaces/~INft.tsol";
+import "./libraries/~Errors.tsol";
+import "d:/VenomAuditContracts/venomAuditContracts/node_modules/@broxus/tip4/contracts/TIP4_2_2/TIP4_2_2Collection.tsol";
+import "d:/VenomAuditContracts/venomAuditContracts/node_modules/@broxus/tip4/contracts/TIP4_3/TIP4_3Collection.tsol";
+import "d:/VenomAuditContracts/venomAuditContracts/node_modules/@broxus/tip4/contracts/access/OwnableInternal.tsol";
+
+contract Collection is TIP4_2_2Collection, TIP4_3Collection, OwnableInternal  {
+	
+	uint64 static nonce_;
+
+	enum StatusFlag { Off, Active }
+
+	uint256 _totalMinted;
+	uint128 _remainOnNft;
+
+	StatusFlag public mintNftStatus;
+
+	mapping(uint16 => string) private nftTypes;
+
+	event NftTypeAdded(address _sender, uint8 _index, string _name);
+	event NftTypeUpdated(address _sender, uint8 _index, string _name);
+	event NftTypeDeleted(address _sender, uint8 _index, string _name);
+
+	event NftTypeNameChanged(uint256 nftId, address nftAddress, string oldTypeName, string newTypeName);
+	event NftNickNameChanged(uint256 nftId, address nftAddress, string oldNickName, string newNickName);
+
+	constructor(
+		TvmCell codeNft,
+		TvmCell codeIndex,
+		TvmCell codeIndexBasis,
+		address owner,
+		uint128 remainOnNft,
+		string baseNftUrl,
+        string collectionUrl,
+		address genesisNftOwner,
+		string genesisNickName,
+		uint64 nonce
+	)
+		public
+		OwnableInternal(owner)
+		TIP4_1Collection(codeNft)
+		TIP4_2_2Collection(baseNftUrl, collectionUrl)
+		TIP4_3Collection(codeIndex, codeIndexBasis)		
+	{				
+		tvm.accept();		
+		tvm.rawReserve(1 ever, 0);
+		require(genesisNftOwner != address(0), Errors.zero_address_is_prohibited_for_owner);
+		
+		_remainOnNft = remainOnNft;		
+		mintNftStatus = StatusFlag.Off;	
+
+		_addUpdateNftType(0, 'S');
+		_addUpdateNftType(1, 'D');
+
+		_mintNft(genesisNftOwner, 0, address(0), nftTypes.at(0), genesisNickName, 0, 128);
+		nonce_ = nonce;
+	}
+
+	function codeDepth() public view returns(uint16) {
+        return (_buildNftCode(address(this)).depth());
+	}
+
+	function resolveIndexCodeHash(address collection, address owner) public view returns (uint256 hash) {
+		TvmCell code = _buildIndexCode(collection, owner);
+		return tvm.hash(code);
+	}
+
+	function mintNftByType(address owner, uint256 parentNftId, address parentNftAddress, uint8 nftTypeIndex, string nickName) external virtual onlyOwner {
+		require(mintNftStatus == StatusFlag.Active, Errors.minting_must_be_active);
+		require(nftTypes.exists(nftTypeIndex), Errors.nft_type_not_set);
+		require(_resolveNft(parentNftId) == parentNftAddress, Errors.parent_nft_does_not_belong_to_this_collection);
+		require(owner != address(0), Errors.zero_address_is_prohibited_for_owner);
+		require(
+			msg.value > _remainOnNft + _indexDeployValue * 2 + 0.3 ever,
+			Errors.value_is_less_than_required
+		);
+		tvm.rawReserve(1 ever, 0);
+		_mintNft(owner, parentNftId, parentNftAddress, nftTypes.at(nftTypeIndex), nickName, 0, 128);
+	}
+
+	function totalMinted() external view responsible returns (uint256 count) {
+		return {value: 0, flag: 64, bounce: false} (_totalMinted);
+	}
+
+    function setMinitingStatus(StatusFlag mintNftStatus_) external virtual onlyOwner {
+		tvm.rawReserve(1 ever, 0);		
+		mintNftStatus = mintNftStatus_;	
+    }
+
+	function setRemainOnNft(uint128 remainOnNft) external virtual onlyOwner {
+		_remainOnNft = remainOnNft;
+	}
+
+	function getRemainOnNft() external view responsible returns (uint256 remainOnNft)  {
+		return {value: 0, flag: 64, bounce: false} (_remainOnNft);
+	}
+
+	function changeNftTypeName(uint256 nftId, address nftAddress, uint8 nftTypeIndex) external onlyOwner {
+		require(msg.value >= 0.5 ever, Errors.value_is_less_than_required);
+		require(_resolveNft(nftId) == nftAddress, Errors.nft_does_not_belong_to_this_collection);
+		require(nftTypes.exists(nftTypeIndex), Errors.nft_type_not_set);
+		INft(nftAddress).setTypeName{value:0, flag:64, bounce: true}(nftTypes.at(nftTypeIndex));
+	}
+
+	function acceptNftTypeNameChange(uint256 nftId, string newNftTypeName, string oldNftTypeName) external {
+        require(msg.sender == owner(), Errors.not_callable);
+		address resolvedNft = _resolveNft(nftId);
+		require(resolvedNft != address(0), Errors.not_callable);
+		require(msg.sender == owner() , Errors.not_callable);
+		require(msg.sender.value != 0 && resolvedNft == msg.sender, Errors.not_callable);
+		owner().transfer({value: 0, flag: 64, bounce: false});
+		emit NftTypeNameChanged(nftId, resolvedNft, oldNftTypeName, newNftTypeName);
+	}
+
+	function changeNftNickName(uint256 nftId, address nftAddress, string nickName) external onlyOwner {	
+		require(msg.value >= 0.5 ever, Errors.value_is_less_than_required);
+		require(_resolveNft(nftId) == nftAddress, Errors.nft_does_not_belong_to_this_collection);
+		INft(nftAddress).setNickName{value:0, flag:64, bounce: true}(nickName);
+	}
+
+	function acceptNftNickNameChange(uint256 nftId, string newNftNickName, string oldNftNickName, address sendRemainGasTo) external {
+		require(msg.sender == owner(), Errors.not_callable);
+        address resolvedNft = _resolveNft(nftId);
+		require(msg.sender.value != 0 && resolvedNft == msg.sender, Errors.not_callable);
+		if(sendRemainGasTo == address(this)) {
+			owner().transfer({value: 0, flag: 64, bounce: false});
+		}
+		emit NftNickNameChanged(nftId, resolvedNft, oldNftNickName, newNftNickName);
+    }
+
+	function getNftType(uint8 index) external view responsible returns(optional(string)) {
+		return {value: 0, bounce: false, flag: 64} nftTypes.fetch(index);
+	}
+
+	function getAllNftTypesIndexes() external view responsible returns(uint16[]) {
+		return {value: 0, bounce: false, flag: 64} nftTypes.keys();
+	}
+
+	function isNftTypeExists(uint8 index) external view responsible returns(bool) {
+		return {value: 0, bounce: false, flag: 64} nftTypes.exists(index);
+	}
+
+	function addUpdateNftType(uint8 index, string name) external onlyOwner {	
+        require(index != 0, Errors.protected_nft_type);
+		tvm.rawReserve(1 ever, 0);		
+		_addUpdateNftType(index, name);
+	}
+
+	function deleteNftType(uint8 index) external onlyOwner {
+        require(index != 0, Errors.protected_nft_type);
+		require(nftTypes.exists(index), Errors.nft_type_not_set);
+		tvm.rawReserve(1 ever, 0);
+		emit NftTypeDeleted(msg.sender, index, nftTypes.at(index));
+		delete nftTypes[index];
+	}
+
+	function setBaseUrl(string _baseNftUrl) external onlyOwner {
+		baseNftUrl = _baseNftUrl;
+		emit NftMetadataUpdated();
+	}
+
+	function setCollectionUrl(string _url) external onlyOwner {
+		collectionUrl_ = _url;
+		emit CollectionMetadataUpdated();
+	}
+
+	function withdrawBalance(address to) external  onlyOwner {
+        tvm.rawReserve(1 ever, 0);
+        to.transfer({value: 0, flag: 128, bounce: true});	
+    }
+
+	function _addUpdateNftType(uint8 _index, string _name) internal {
+        require(_index != 0, Errors.protected_nft_type);
+		if(nftTypes.exists(_index)) {			
+			nftTypes.replace(_index, _name);
+			emit NftTypeUpdated(msg.sender, _index, _name);
+		} else {
+			nftTypes.add(_index, _name);
+			emit NftTypeAdded(msg.sender, _index, _name);
+		}
+	}
+
+	function _mintNft(address owner, uint256 parentNftId, address parentNftAddress, string nftType, string nickName, uint128 value, uint16 flag) internal virtual 	
+	{
+		uint256 id = uint256(_totalMinted) + 1;
+		_totalMinted++;
+		_totalSupply++;		
+
+		TvmCell codeNft = _buildNftCode(address(this));
+		TvmCell stateNft = _buildNftState(codeNft, id);
+		address nftAddr = new Nft{stateInit: stateNft, value: value, flag: flag}(
+			owner,
+			msg.sender,
+			_remainOnNft,
+			id,
+			parentNftId,
+			parentNftAddress,
+			nftType,
+			nickName,			
+			_indexDeployValue,
+			_indexDestroyValue,
+			_codeIndex
+		);
+
+		emit NftCreated(id, nftAddr, owner, owner, msg.sender);
+	}
+
+	function _buildNftState(TvmCell code, uint256 id)
+		internal
+		pure
+		virtual
+		override (TIP4_2_2Collection, TIP4_3Collection)
+		returns (TvmCell)
+	{
+		return tvm.buildStateInit({contr: Nft, varInit: {_id: id}, code: code});
+	}
+
+}

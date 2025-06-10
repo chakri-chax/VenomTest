@@ -1,0 +1,256 @@
+pragma ever-solidity >= 0.62.0;
+
+pragma AbiHeader expire;
+pragma AbiHeader time;
+pragma AbiHeader pubkey;
+
+import "@broxus/tip4/contracts/TIP4_2/TIP4_2Collection.tsol";
+import "@broxus/tip4/contracts/TIP4_3/TIP4_3Collection.tsol";
+import "@broxus/contracts/contracts/access/InternalOwner.tsol";
+
+
+import './Nft.tsol';
+
+contract FounderNFTCollection is TIP4_2Collection, TIP4_3Collection,InternalOwner {
+
+    uint64 static nonce_;
+    uint256 public _totalMinted;
+
+    uint128 _tokenId = 1;
+    uint256 public requestId = 0;
+    uint256 public constant MAX_SUPPLY = 222000;
+     uint256 public lastHolderIndex = 0;
+
+    address public warehouseWallet;
+    address public routingWallet;
+    string private baseTokenURI;
+
+
+struct MintRequest {
+        address to;
+        uint256 amount;
+        uint256 requestId;
+        bool completed;
+    }
+
+    MintRequest[] public pendingMints;
+
+    mapping(uint256 => uint256) private requestIdToIndex;
+     
+    mapping(address => uint256) private holderTokenCount;
+    mapping(uint256 => address) public nftAddressOf;
+
+    event MintInitiated(address indexed to, uint256 indexed requestId, uint256 indexed amount);
+    event MintCompleted(address indexed to, uint256 indexed requestId, uint256 indexed amount);
+    event BatchMintCompleted(uint256 totalAddresses);
+    event CompletedNft(uint256 id,address indexed to,address indexed nftAddress);
+    constructor(
+        TvmCell codeNft,
+        TvmCell codeIndex,
+        TvmCell codeIndexBasis,
+        address owner,
+        uint128 remainOnNft,
+        string json,
+
+        address _warehouseWallet, 
+        address _routingWallet, 
+        string  _baseTokenURI
+
+    )
+        public
+        TIP4_1Collection(codeNft)
+        TIP4_2Collection(json)
+        TIP4_3Collection(codeIndex, codeIndexBasis) 
+        
+
+    {
+        tvm.accept();
+        tvm.rawReserve(1 ever, 0);
+
+        require(_warehouseWallet != address(0), 101);
+        require(_routingWallet != address(0), 102);
+        warehouseWallet = _warehouseWallet;
+        routingWallet = _routingWallet;
+        baseTokenURI = _baseTokenURI;
+        owner = msg.sender;
+
+    }
+
+    function codeDepth() public view returns(uint16) {
+        return (_buildNftCode(address(this)).depth());
+    }
+
+function nextTokenId() external view responsible returns (uint128 nftId){
+    return  {value: 0, flag: 64, bounce: false} (_tokenId);
+}
+
+function incrememt() public  returns (uint256) {
+_totalMinted++;
+return (_totalMinted);
+}
+
+    function _buildNftState(TvmCell code, uint256 id)
+        internal
+        pure
+        virtual
+        override (TIP4_2Collection, TIP4_3Collection)
+        returns (TvmCell)
+    {
+        return tvm.buildStateInit({contr: Nft, varInit: {_id: id}, code: code});
+    }
+function totalMinted() external view responsible returns (uint256 count) {
+		return {value: 0, flag: 64, bounce: false} (_totalMinted);
+	}
+
+    function mintNft(address to) public virtual {
+        // require(msg.value > 0.4 ever, 101);
+        // tvm.rawReserve(0, 4);
+
+        uint256 id = uint256(_totalMinted) + 1;
+		_totalMinted++;
+		_totalSupply++;	
+
+        TvmCell codeNft = _buildNftCode(address(this));
+        TvmCell stateNft = tvm.buildStateInit({
+            contr: Nft,
+            varInit: {_id: id},
+            code: codeNft
+        });
+        address _nftAddress = new Nft{
+            stateInit: stateNft,
+            value: 0,
+            flag: 128
+        }(
+            to, // owner
+            msg.sender, // sendGasTo
+            0.3 ever,// remainOnNFT
+            "{collection:FounderNFT}",      //json      // for TIP-4.2    
+            _codeIndex,        
+            _indexDeployValue, 
+            _indexDestroyValue 
+        );
+        nftAddressOf[id] = _nftAddress;
+
+        emit CompletedNft(id,to,_nftAddress);
+    }
+
+function getNftAddress(uint256 id) external view returns(address){
+    return nftAddressOf[id];
+}
+
+    function initiateMint(address _to, uint256 _amount) external {
+        require(_to != address(0), 103);
+        require(_amount > 0, 104);
+        require(msg.sender == routingWallet, 105);
+        require(_tokenId < MAX_SUPPLY, 106);
+
+        requestId += 1;
+
+        pendingMints.push(MintRequest({
+            to: _to,
+            amount: _amount,
+            requestId: requestId,
+            completed: false
+        }));
+        
+      
+        requestIdToIndex[requestId] = pendingMints.length-1;
+
+        emit MintInitiated(_to, requestId, _amount);
+    }
+    function getIndexFromRequestId(uint256 _requestId) internal view returns (uint256) {
+        require(_requestId > 0 && _requestId <= requestId,109);
+        return requestIdToIndex[_requestId];
+    }
+    function completeMint(uint256 _requestId) external  {
+        require(msg.sender == warehouseWallet,201);
+        uint256 index = getIndexFromRequestId(_requestId);
+        require(index <= pendingMints.length, 107);
+        MintRequest mintRequest = pendingMints[index];
+        require(!mintRequest.completed, 108);
+
+        
+        uint128 amount = uint128(mintRequest.amount);
+        mintRequest.completed = true;
+
+        mintNft(mintRequest.to);
+        
+
+        // for (uint256 i = _tokenId; i < (_tokenId + amount); i++) {
+        //     mintNft(mintRequest.to,i);
+        // }
+        // _tokenId += amount;
+
+
+        emit MintCompleted(mintRequest.to, mintRequest.requestId, amount);
+     
+        _removePendingMint(index);      
+    }
+
+     function _removePendingMint(uint256 index) internal {
+        uint256 lastIndex = pendingMints.length - 1;
+
+        if (index != lastIndex) {
+            MintRequest lastMintRequest = pendingMints[lastIndex];
+            pendingMints[index] = lastMintRequest;
+            requestIdToIndex[lastMintRequest.requestId] = index;
+        }
+
+        pendingMints.pop();
+    }
+    function getPendingMints() external view returns (MintRequest[] ) {
+        return pendingMints;
+    }
+    function mintBatchToHolders(address[] holders, uint256[] amounts) external  {
+        require(msg.sender == warehouseWallet,201);
+        
+        require(holders.length == amounts.length, 202);
+        
+        uint256 totalAddresses = holders.length;
+        for (uint256 i = 0; i < totalAddresses; i++) {
+            address holder = holders[i];
+            uint256 amount = amounts[i];
+
+
+            for (uint256 j = 0; j < amount; j++) {
+                mintNft(holder);
+
+                _tokenId++;
+            }
+        }
+
+        emit BatchMintCompleted(totalAddresses);
+    }
+
+
+    function setWarehouseWallet(address _warehouseWallet) external  {
+        require(msg.sender == warehouseWallet,201);
+        
+        require(_warehouseWallet != address(0), 103);
+        warehouseWallet = _warehouseWallet;
+    }
+
+    function setRoutingWallet(address _routingWallet) external  {
+        require(msg.sender == warehouseWallet,201);
+        
+        require(_routingWallet != address(0), 103);
+        routingWallet = _routingWallet;
+    }
+
+     function _baseURI() public view returns (string ) {
+        return baseTokenURI;
+    }
+
+    // function tokenURI(uint256 tokenId) public view override returns (string memory) {
+    //     require(tokenId < _tokenId, 203);
+    //     return string(abi.encodePacked(baseTokenURI, Strings.toString(tokenId), ".json"));
+    // }
+function totalrequestId() external view returns (uint256){
+        return requestId;
+    }
+function totalSupply() external view virtual override responsible returns (uint128 count) {
+        return {value: 0, flag: 64, bounce: false} (_tokenId -1 );
+    }
+    
+   
+}
